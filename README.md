@@ -1,11 +1,10 @@
-# Ansible for Apollo Kafka Platform
+#Vincent Nambatac
 
-Ansible playbooks to install kafka cluster and zookeeper ensemble for Apollo Kafka Platform.
+Ansible playbooks to install kafka cluster and zookeeper ensemble for my projects 
 
 This project is composed of two different playbooks, the first being used to install the kafka cluster and zookeeper ensemble installation. 
 The second playbook descibes the monitor/manager machine used to monitor the kafka platform.
 
-<img src="img/dia.png" width="500">
 
 
 
