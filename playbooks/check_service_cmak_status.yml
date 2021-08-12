@@ -1,0 +1,11 @@
+- name: CHECK CMAK CLUSTER SERVICES STATUS
+  hosts: manager
+  gather_facts: no
+
+  tasks:
+  - name: get service facts
+    service_facts:
+
+  - name: check cmak status
+    debug:
+      var: ansible_facts.services["cmak.service"]

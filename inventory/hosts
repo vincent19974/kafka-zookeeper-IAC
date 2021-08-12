@@ -1,0 +1,11 @@
+[kafka]
+172.29.224.48 ansible_user=root
+
+[zookeeper]
+172.29.224.76 ansible_user=root
+
+[manager]
+172.29.224.68 ansible_user=root
+
+[connect]
+#192.168.15.207 ansible_user=root

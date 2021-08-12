@@ -1,0 +1,15 @@
+[Unit]
+Description=Node Exporter
+After=network.target
+
+[Service]
+User={{ kafka_monitor_user }}
+Group={{ kafka_monitor_user }}
+Type=simple
+
+Environment="JAVA_HOME=/usr/bin"
+WorkingDirectory=/home/monitor
+ExecStart=java --add-opens=java.base/sun.nio.ch=ALL-UNNAMED -jar /opt/kafdrop/target/kafdrop-3.28.0-SNAPSHOT.jar --kafka.brokerConnect=kafka-broker-1.apolloglobal.net:9092,kafka-broker-2.apolloglobal.net:9092,kafka-broker-3.apolloglobal:9092 --server.port=9001 --management.server.port=9001
+
+[Install]
+WantedBy=multi-user.target

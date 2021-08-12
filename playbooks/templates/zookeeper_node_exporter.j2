@@ -1,0 +1,12 @@
+ [Unit]                                                                                    
+ Description=Node Exporter                                                                 
+ After=network.target                                                                      
+                                                                                           
+ [Service]                                                                                 
+ User={{ zookeeper_user }}                                                             
+ Group={{ zookeeper_user }}                                                                            
+ Type=simple                                                                               
+ ExecStart=/opt/node_exporter/node_exporter --web.listen-address=":7001"                   
+                                                                                           
+ [Install]                                                                                 
+ WantedBy=multi-user.target

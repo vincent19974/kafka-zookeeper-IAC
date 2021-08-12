@@ -1,0 +1,12 @@
+[Unit]
+Description=Cruise Control service
+
+[Service]
+Type=simple
+User=monitor
+Group=monitor
+WorkingDirectory=/opt/cruise-control
+ExecStart=/opt/cruise-control/kafka-cruise-control-start.sh /opt/cruise-control/config/cruisecontrol.properties
+
+[Install]
+WantedBy=multi-user.target
