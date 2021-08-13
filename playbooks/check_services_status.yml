@@ -1,0 +1,57 @@
+- name: CHECK ZOOKEEPER CLUSTER SERVICES STATUS
+  hosts: zookeeper
+  gather_facts: no
+
+  tasks:
+  - name: get service facts
+    service_facts:
+
+  - name: check zookeeper status
+    debug:
+      var: ansible_facts.services["zookeeper.service"]
+
+  - name: check Prometheus agent for zookeeper running in port 7000
+    command: curl localhost:7000
+    register: curl_7000_status
+
+  - name: Debug
+    debug:
+      var: curl_7000_status
+
+  - name: check Prometheus agent for the node running in port 7001
+    command: curl localhost:7001
+    register: curl_7001_status
+
+  - name: Debug
+    debug:
+      var: curl_7001_status
+
+
+- name: CHECK KAFKA CLUSTER SERVICES STATUS
+  hosts: kafka
+  gather_facts: no
+
+  tasks:
+  - name: get service facts
+    service_facts:
+
+  - name: check kafka status
+    debug:
+      var: ansible_facts.services["kafka.service"]
+
+  - name: check Prometheus agent for kafka running in port 7000
+    command: curl localhost:7000
+    register: curl_7000_status
+  
+  - name: Debug 
+    debug:
+      var: curl_7000_status
+
+  - name: check Prometheus agent for the node running in port 7001
+    command: curl localhost:7001
+    register: curl_7001_status
+
+  - name: Debug
+    debug:
+      var: curl_7001_status
+
