@@ -1,7 +1,7 @@
 
 - hosts: manager
-  become: true
-  become_method: sudo
+  become: yes
+  user: root
   gather_facts: False
   tasks:
 
@@ -234,11 +234,13 @@
       mode: 0755
 
   - name: enable service kafdrop.service and ensure it is not masked
+    systemd:
       name: kafdrop.service
       enabled: yes
       masked: no
 
   - name: Start kafdrop
+    service:
       name: kafdrop.service
       state: restarted
     become: yes
@@ -297,27 +299,12 @@
       cd {{ kafka_cruise_control_folder }} && git init
       cd {{ kafka_cruise_control_folder }} && ./gradlew jar
 
-  - name: "Copy cruise-control metrics reporter to kafka brokers lib to /opt/kafka/libs"
-    synchronize:
-      mode: push
-      src: /opt/cruise-control/cruise-control-metrics-reporter/build/libs/cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar
-      dest: /opt/kafka/libs
-    delegate_to: kafka
-    register: sync_file
-    run_once: true
-    with_items:
-      - "/tmp/cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar"
 
-
-  - name: Update cruisecontrol.properties
-    template:
-      src: templates/cruisecontrol.properties
-      dest: /opt/cruise-control/config/cruisecontrol.properties
 
   - name: Create capacity.json file
     file:
       state: touch
-      path: /opt/cruise-control/capacity.json
+      path: /opt/cruise-control/config/capacity.json
 
   - name: Compile dependant libs
     shell: |
@@ -327,4 +314,77 @@
     template:
       src: templates/cruise-control.service
       dest: /etc/systemd/system/cruise-control.service
+      mode: 0755
+
+  - name: Update cruisecontrol.properties
+    template:
+      src: templates/cruisecontrol.properties
+      dest: /opt/cruise-control/config/cruisecontrol.properties
+
+
+#Fetch the file cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar to master machine
+  - name: Fetch cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar file from the manager to master machine
+    run_once: yes
+    fetch: src=/opt/cruise-control/cruise-control-metrics-reporter/build/libs/cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar dest=buffer/ flat=yes
+    delegate_to: manager
+
+
+#Push cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar to kafka brokers
+
+- hosts: kafka
+  vars_files:
+     - vars/settings.yaml
+  become: yes
+  user: root
+  tasks:
+  - name: Push cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar to kafka brokers
+    copy: src=buffer/cruise-control-metrics-reporter-0.1.0-SNAPSHOT.jar dest=/opt/kafka/libs/
+
+
+#  - name: Update server.properties config
+#    copy: src=buffer/server.properties dest=/opt/kafka/config/server.properties
+#    delegate_to: kafka
+#
+#  - name: Add cruise-control configs to server.properties for kafka brokers
+#    lineinfile:
+#      path: /opt/kafka/config/server.properties
+#      line: 'metric.reporters=com.linkedin.kafka.cruisecontrol.metricsreporter.CruiseControlMetricsReporter'
+#      insertafter: EOF
+#
+#  - name: Add cruise-control configs to server.properties for kafka brokers
+#    lineinfile:
+#      path: /opt/kafka/config/server.properties
+#      line: 'broker.rack="rack-1"'
+#     insertafter: EOF
+
+    
+#Roll restart
+
+
+- hosts: kafka
+  become: yes
+  user: root
+  tasks:
+
+  - name: Restart kafka brokers
+    service:
+      name: kafka.service
+      state: restarted
+
+#Run cruise-control service
+
+- hosts: manager
+  become: yes
+  user: root
+  tasks:
+  - name: enable cruise-control.service and ensure it is not masked
+    systemd:
+      name: cruise-control.service
+      enabled: yes
+      masked: no
+
+  - name: Start cruisecontrol.service
+    service:
+      name: cruise-control.service
+      state: restarted
 

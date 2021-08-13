@@ -492,3 +492,8 @@
       name: node_exporter.service
       state: restarted
 
+  - name: Fetch server.properties from kafka brokers to master machine
+    run_once: yes
+    fetch: src=/opt/kafka/config/server.properties dest=buffer/ flat=yes
+    delegate_to: kafka
+
